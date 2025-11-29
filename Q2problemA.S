@@ -2,14 +2,13 @@
     .globl  main
     .globl print_cycle
 main:
-    #Read cycle
-    addi x2, x2, -4
-    sw    x18, 0(x2)
-    csrr x18, cycle
+    
     # Main 
     addi    x2, x2, -48
     sw      x8, 0(x2)
     sw      x9, 4(x2)
+#Read cycle
+    csrr x29, cycle
     sw      x18, 8(x2)
     sw      x19, 12(x2)
     sw      x20, 16(x2)
@@ -103,8 +102,7 @@ handle_large:
     # BLANK 21: Load reference disk position
     lw      x6, 20(x2)
 
-    # BLANK 22: Sum of all peg indices (0+1+2)    ecall
-    addi sp, sp,4
+    # BLANK 22: Sum of all peg indices (0+1+2)  ecall
 
     addi    x19, x0, 3
     sub     x19, x19, x18
@@ -141,7 +139,8 @@ display_move:
     addi    x10, x9, 49
     sw      x10,44(x2)
     li      a0,1
-    addi    a1,x2,44 #ls the low-level SYS_write (ecall 64) to print these three separate ASCII characters.
+    addi    a1,x2,44
+    #ls the low-level SYS_write (ecall 64) to print these three separate ASCII characters.
     li      a2,1
     addi    x17, x0,64
     ecall
@@ -173,7 +172,7 @@ display_move:
     li      a0,10
     sw      a0,40(x2)
     li      a0,1
-#ls the low-level SYS_write (ecall 64) to print these three separate ASCII characters.   
+    #ls the low-level SYS_write (ecall 64) to print these three separate ASCII characters.   
     addi    a1, x2, 40
     li      a2,1
     addi    x17, x0, 64
@@ -197,17 +196,13 @@ finish_game:
     lw      x18, 8(x2)
     lw      x19, 12(x2)
     lw      x20, 16(x2)
-    addi    x2, x2, 48
 
     # Recover start cycle into t1
-    lw t1, 0(sp)
-    addi sp, sp,4
-# Read end cycle
+    # Read end cycle
     csrr    t2, cycle
-    sub a0, t2, t1
-    addi sp, sp,4
+    sub a0, t2, x29
     jal print_cycle
-
+    addi    x2, x2, 48
     li	    a0,0
     addi    x17, x0, 93
     ecall
